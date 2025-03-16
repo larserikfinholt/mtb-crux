@@ -3,12 +3,22 @@ import { ref, onMounted, watch } from 'vue';
 import { useCruxStore } from '@/stores/crux';
 import 'leaflet/dist/leaflet.css';
 import { LMap, LTileLayer, LMarker, LPopup, LIcon } from '@vue-leaflet/vue-leaflet';
+import { useRouter } from 'vue-router';
 
 const cruxStore = useCruxStore();
 const zoom = ref(13);
 const center = ref([59.9139, 10.7522]); // Default center (Oslo)
 const mapReady = ref(false);
 const markerIcon = ref(null);
+const router = useRouter();
+
+// Function to format crux level as stars
+const formatLevel = (level?: number) => {
+  if (!level) return '';
+  const stars = '★'.repeat(level);
+  return stars;
+};
+
 
 // Fetch crux items when the component is mounted
 onMounted(async () => {
@@ -45,17 +55,12 @@ onMounted(async () => {
   mapReady.value = true;
 });
 
-// Function to format crux level as stars
-const formatLevel = (level?: number) => {
-  if (!level) return '';
-  const stars = '★'.repeat(level);
-  return stars;
-};
 
 // Method to open popup when clicking on a marker
 const handleMarkerClick = (crux: any) => {
-  // You could add functionality here if needed
-  console.log('Clicked on crux:', crux.name);
+  // navigate to the crux details view
+  console.log('Clicked on crux:', crux.name); 
+  router.push(`/crux/${crux.id}`);
 };
 </script>
 
@@ -97,19 +102,7 @@ const handleMarkerClick = (crux: any) => {
       </l-map>
     </div>
     
-    <!-- Mobile-friendly list view of crux points -->
-    <div class="crux-list">
-      <h2>Crux Points</h2>
-      <ul>
-        <li v-for="crux in cruxStore.items" :key="crux.id" class="crux-item" @click="center = [parseFloat(crux.lat || '0'), parseFloat(crux.lng || '0')]; zoom = 15;">
-          <div class="crux-item-name">{{ crux.name }}</div>
-          <div class="crux-item-details">
-            <span v-if="crux.level" class="difficulty-indicator">{{ formatLevel(crux.level) }}</span>
-            <span class="coordinates">({{ crux.lat }}, {{ crux.lng }})</span>
-          </div>
-        </li>
-      </ul>
-    </div>
+    
   </div>
 </template>
 

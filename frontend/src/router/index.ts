@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import ListView from '../views/ListView.vue'
 import MapView from '../views/MapView.vue'
-
+import CruxDetailsView from '../views/CruxDetailsView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -14,6 +14,11 @@ const router = createRouter({
       path: '/list',
       name: 'list',
       component: ListView,
+    },
+    {
+      path: '/crux/:id',
+      name: 'crux',
+      component: CruxDetailsView,
     },
     
     
