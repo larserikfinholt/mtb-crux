@@ -1,0 +1,11 @@
+﻿namespace api.Model
+{
+    public class Crux
+    {
+        public string Lat { get; set; }
+        public string Lng { get; set; }
+        public int Level { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+    }
+}
