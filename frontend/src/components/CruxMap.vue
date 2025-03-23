@@ -7,13 +7,14 @@ import { useRouter } from 'vue-router';
 
 const cruxStore = useCruxStore();
 const zoom = ref(13);
-const center = ref([59.9139, 10.7522] as [number, number]); // Fixed type by explicitly typing as tuple
+const center = ref([59.9139, 10.7522] as [number, number]); // Default position until user location is obtained
 const mapReady = ref(false);
 const markerIcon = ref<any>(null); // Changed type to any to fix type error
 const mapInstance = ref<any>(null); // Reference to the map instance
 const router = useRouter();
 const isLocating = ref(false);
-const activeBaseLayer = ref('openstreetmap');
+const activeBaseLayer = ref('norgeskart-topo'); // Changed default to Norgeskart topographic
+const isLayerSelectorVisible = ref(false); // New ref to track layer selector visibility
 
 // Define available base layers
 const baseLayers = [
@@ -37,9 +38,15 @@ const baseLayers = [
   }
 ];
 
+// Function to toggle layer selector visibility
+const toggleLayerSelector = () => {
+  isLayerSelectorVisible.value = !isLayerSelectorVisible.value;
+};
+
 // Function to change the base layer
 const changeBaseLayer = (layerId: string) => {
   activeBaseLayer.value = layerId;
+  isLayerSelectorVisible.value = false; // Hide selector after selection
 };
 
 // Function to format crux level as stars
@@ -77,6 +84,24 @@ const getCurrentLocation = () => {
 
 // Fetch crux items when the component is mounted
 onMounted(async () => {
+  // Try to get user location first
+  if (navigator.geolocation) {
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { 
+          timeout: 5000,
+          maximumAge: 60000 
+        });
+      });
+      
+      const { latitude, longitude } = position.coords;
+      center.value = [latitude, longitude];
+    } catch (error) {
+      console.warn('Could not get user location, using default coordinates', error);
+      // Keep default center if location cannot be obtained
+    }
+  }
+
   // Fix for Leaflet marker icons in production
   const leaflet = await import('leaflet');
   // @ts-ignore
@@ -101,8 +126,8 @@ onMounted(async () => {
     await cruxStore.fetchItems();
   }
   
-  // Center the map on crux items if available
-  if (cruxStore.items.length > 0) {
+  // Center the map on crux items if available and user location wasn't found
+  if (cruxStore.items.length > 0 && center.value[0] === 59.9139) {
     const firstCrux = cruxStore.items[0];
     center.value = [parseFloat(firstCrux.lat || '59.9139'), parseFloat(firstCrux.lng || '10.7522')];
   }
@@ -162,8 +187,8 @@ const onMapReady = (map: any) => {
         </template>
       </l-map>
       
-      <!-- Layer control -->
-      <div class="layer-control">
+      <!-- Layer control - only visible when toggled -->
+      <div class="layer-control" v-if="isLayerSelectorVisible">
         <button 
           v-for="layer in baseLayers" 
           :key="layer.id"
@@ -174,6 +199,15 @@ const onMapReady = (map: any) => {
           {{ layer.name }}
         </button>
       </div>
+      
+      <!-- Layer toggle button -->
+      <button 
+        class="layer-toggle-button" 
+        @click="toggleLayerSelector"
+        title="Change map style"
+      >
+        <span class="layer-icon">🗺️</span>
+      </button>
       
       <!-- Location button -->
       <button 
@@ -203,8 +237,8 @@ const onMapReady = (map: any) => {
 
 .layer-control {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  bottom: 70px;
+  right: 20px;
   z-index: 1000;
   background: white;
   border-radius: 4px;
@@ -212,6 +246,13 @@ const onMapReady = (map: any) => {
   padding: 6px;
   display: flex;
   flex-direction: column;
+  max-width: 200px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .layer-control button {
@@ -234,6 +275,36 @@ const onMapReady = (map: any) => {
   background-color: #4CAF50;
   color: white;
   border-color: #4CAF50;
+}
+
+.layer-toggle-button {
+  position: absolute;
+  bottom: 70px;
+  right: 20px;
+  z-index: 999;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: white;
+  border: none;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.layer-toggle-button:hover {
+  background-color: #f0f0f0;
+}
+
+.layer-toggle-button:active {
+  transform: scale(0.95);
+}
+
+.layer-icon {
+  font-size: 18px;
 }
 
 .location-button {
