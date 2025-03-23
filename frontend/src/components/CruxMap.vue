@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { useCruxStore } from '@/stores/crux';
 import 'leaflet/dist/leaflet.css';
-import { LMap, LTileLayer, LMarker, LPopup, LIcon } from '@vue-leaflet/vue-leaflet';
+import { LMap, LTileLayer, LMarker, LPopup, LIcon, LLayerGroup, LControl } from '@vue-leaflet/vue-leaflet';
 import { useRouter } from 'vue-router';
 
 const cruxStore = useCruxStore();
@@ -13,6 +13,34 @@ const markerIcon = ref<any>(null); // Changed type to any to fix type error
 const mapInstance = ref<any>(null); // Reference to the map instance
 const router = useRouter();
 const isLocating = ref(false);
+const activeBaseLayer = ref('openstreetmap');
+
+// Define available base layers
+const baseLayers = [
+  { 
+    id: 'openstreetmap', 
+    name: 'OpenStreetMap', 
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  },
+  { 
+    id: 'norgeskart-topo', 
+    name: 'Norgeskart (Topographic)', 
+    url: 'https://cache.kartverket.no/v1/wmts/1.0.0/topo/default/webmercator/{z}/{y}/{x}.png',
+    attribution: '&copy; <a href="http://www.kartverket.no/">Kartverket</a>'
+  },
+  { 
+    id: 'norgeskart-gray', 
+    name: 'Norgeskart (Gray)', 
+    url: 'https://cache.kartverket.no/v1/wmts/1.0.0/topograatone/default/webmercator/{z}/{y}/{x}.png',
+    attribution: '&copy; <a href="http://www.kartverket.no/">Kartverket</a>'
+  }
+];
+
+// Function to change the base layer
+const changeBaseLayer = (layerId: string) => {
+  activeBaseLayer.value = layerId;
+};
 
 // Function to format crux level as stars
 const formatLevel = (level?: number) => {
@@ -103,12 +131,16 @@ const onMapReady = (map: any) => {
         class="map"
         @ready="onMapReady"
       >
-        <l-tile-layer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          layer-type="base"
-          name="OpenStreetMap"
-          attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
-        ></l-tile-layer>
+        <!-- Render the active base layer -->
+        <template v-for="layer in baseLayers" :key="layer.id">
+          <l-tile-layer
+            v-if="layer.id === activeBaseLayer"
+            :url="layer.url"
+            layer-type="base"
+            :name="layer.name"
+            :attribution="layer.attribution"
+          ></l-tile-layer>
+        </template>
         
         <!-- Display markers for each crux -->
         <template v-for="crux in cruxStore.items" :key="crux.id">
@@ -129,6 +161,19 @@ const onMapReady = (map: any) => {
           </l-marker>
         </template>
       </l-map>
+      
+      <!-- Layer control -->
+      <div class="layer-control">
+        <button 
+          v-for="layer in baseLayers" 
+          :key="layer.id"
+          @click="changeBaseLayer(layer.id)"
+          :class="{ 'active': activeBaseLayer === layer.id }"
+          :title="layer.name"
+        >
+          {{ layer.name }}
+        </button>
+      </div>
       
       <!-- Location button -->
       <button 
@@ -154,6 +199,41 @@ const onMapReady = (map: any) => {
 .map {
   width: 100%;
   height: 100%;
+}
+
+.layer-control {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.layer-control button {
+  margin: 3px 0;
+  padding: 8px 12px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.layer-control button:hover {
+  background-color: #f0f0f0;
+}
+
+.layer-control button.active {
+  background-color: #4CAF50;
+  color: white;
+  border-color: #4CAF50;
 }
 
 .location-button {
