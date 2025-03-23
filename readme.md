@@ -30,5 +30,5 @@ Database: PostgreSQL / SQL Server
 Autentisering: Anonym registrering eller telefonnummer
 
 ### Tips
-Genereate ts api client `nswag openapi2tsclient /input:https://localhost:<port>/openapi/v1.json /output:api-client.ts
+Genereate ts api client `nswag openapi2tsclient /input:https://localhost:7044/openapi/v1.json /output:src/api/api-client.ts
 `
