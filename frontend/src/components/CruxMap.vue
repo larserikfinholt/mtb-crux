@@ -65,9 +65,6 @@ const handleMarkerClick = (crux: any) => {
 </script>
 
 <template>
-  <div class="crux-map-container">
-    <h1 class="crux-title">Crux Map</h1>
-    
     <div class="map-wrapper">
       <l-map
         v-model:zoom="zoom"
@@ -102,25 +99,9 @@ const handleMarkerClick = (crux: any) => {
       </l-map>
     </div>
     
-    
-  </div>
 </template>
 
 <style scoped>
-.crux-map-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  max-width: 100%;
-  padding: 0.5rem;
-}
-
-.crux-title {
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
 .map-wrapper {
   width: 100%;
   height: 60vh;
@@ -134,108 +115,4 @@ const handleMarkerClick = (crux: any) => {
   height: 100%;
 }
 
-.crux-list {
-  margin-top: 1.5rem;
-  border-radius: 8px;
-  padding: 1rem;
-  background-color: #f9f9f9;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.crux-list h2 {
-  margin-top: 0;
-  margin-bottom: 0.75rem;
-  font-size: 1.25rem;
-}
-
-.crux-list ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.crux-item {
-  padding: 0.75rem;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.crux-item:last-child {
-  border-bottom: none;
-}
-
-.crux-item:hover {
-  background-color: #f0f0f0;
-}
-
-.crux-item-name {
-  font-weight: bold;
-  margin-bottom: 0.25rem;
-}
-
-.crux-item-details {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
-  color: #666;
-}
-
-.difficulty-indicator {
-  color: #f0ad4e;
-}
-
-.coordinates {
-  font-family: monospace;
-  font-size: 0.8rem;
-}
-
-.popup-content {
-  padding: 0.5rem;
-}
-
-.popup-content h3 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-}
-
-.difficulty {
-  margin-bottom: 0.5rem;
-}
-
-.stars {
-  color: #f0ad4e;
-}
-
-/* Mobile responsive styles */
-@media (max-width: 768px) {
-  .crux-map-container {
-    padding: 0.25rem;
-  }
-  
-  .crux-title {
-    font-size: 1.25rem;
-    text-align: center;
-  }
-  
-  .map-wrapper {
-    height: 50vh;
-  }
-  
-  .crux-list {
-    margin-top: 1rem;
-    padding: 0.75rem;
-  }
-  
-  .crux-list h2 {
-    font-size: 1.1rem;
-    text-align: center;
-  }
-  
-  .crux-item {
-    padding: 0.5rem;
-  }
-}
 </style>
