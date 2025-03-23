@@ -1,13 +1,33 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useCruxStore } from '@/stores/crux';
 import 'leaflet/dist/leaflet.css';
 import { LMap, LTileLayer, LMarker, LPopup, LIcon, LLayerGroup, LControl } from '@vue-leaflet/vue-leaflet';
 import { useRouter } from 'vue-router';
 
+// New props for component reusability
+const props = defineProps({
+  showSingleCrux: {
+    type: Boolean,
+    default: false
+  },
+  cruxId: {
+    type: Number,
+    default: undefined
+  },
+  initialCenter: {
+    type: Array as unknown as () => [number, number] | undefined,
+    default: undefined
+  },
+  mapHeight: {
+    type: String,
+    default: '90vh'
+  }
+});
+
 const cruxStore = useCruxStore();
 const zoom = ref(13);
-const center = ref([59.9139, 10.7522] as [number, number]); // Default position until user location is obtained
+const center = ref(props.initialCenter || [59.9139, 10.7522] as [number, number]); // Use prop or default
 const mapReady = ref(false);
 const markerIcon = ref<any>(null); // Changed type to any to fix type error
 const mapInstance = ref<any>(null); // Reference to the map instance
@@ -15,6 +35,14 @@ const router = useRouter();
 const isLocating = ref(false);
 const activeBaseLayer = ref('norgeskart-topo'); // Changed default to Norgeskart topographic
 const isLayerSelectorVisible = ref(false); // New ref to track layer selector visibility
+
+// Computed property to filter crux items based on props
+const cruxItems = computed(() => {
+  if (props.showSingleCrux && props.cruxId) {
+    return cruxStore.items.filter(item => item.id === props.cruxId);
+  }
+  return cruxStore.items;
+});
 
 // Define available base layers
 const baseLayers = [
@@ -84,8 +112,12 @@ const getCurrentLocation = () => {
 
 // Fetch crux items when the component is mounted
 onMounted(async () => {
-  // Try to get user location first
-  if (navigator.geolocation) {
+  // Use initial center from props if available
+  if (props.initialCenter) {
+    center.value = props.initialCenter;
+  }
+  // Only try to get user location if not showing a specific crux
+  else if (!props.showSingleCrux && navigator.geolocation) {
     try {
       const position = await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, { 
@@ -121,14 +153,14 @@ onMounted(async () => {
     shadowSize: [41, 41]
   });
   
-  // Fetch the crux data
+  // Fetch the crux data if not already loaded
   if (cruxStore.items.length === 0) {
     await cruxStore.fetchItems();
   }
   
-  // Center the map on crux items if available and user location wasn't found
-  if (cruxStore.items.length > 0 && center.value[0] === 59.9139) {
-    const firstCrux = cruxStore.items[0];
+  // Center the map on crux items if available, user location wasn't found, and no initialCenter was provided
+  if (cruxItems.value.length > 0 && center.value[0] === 59.9139 && !props.initialCenter) {
+    const firstCrux = cruxItems.value[0];
     center.value = [parseFloat(firstCrux.lat || '59.9139'), parseFloat(firstCrux.lng || '10.7522')];
   }
   
@@ -137,9 +169,11 @@ onMounted(async () => {
 
 // Method to open popup when clicking on a marker
 const handleMarkerClick = (crux: any) => {
-  // navigate to the crux details view
-  console.log('Clicked on crux:', crux.name); 
-  router.push(`/crux/${crux.id}`);
+  // If we're already on the details page, don't navigate
+  if (!props.showSingleCrux) {
+    console.log('Clicked on crux:', crux.name); 
+    router.push(`/crux/${crux.id}`);
+  }
 };
 
 // Store map reference when ready
@@ -149,7 +183,7 @@ const onMapReady = (map: any) => {
 </script>
 
 <template>
-    <div class="map-wrapper">
+    <div class="map-wrapper" :style="{ height: mapHeight }">
       <l-map
         v-model:zoom="zoom"
         :center="center"
@@ -167,8 +201,8 @@ const onMapReady = (map: any) => {
           ></l-tile-layer>
         </template>
         
-        <!-- Display markers for each crux -->
-        <template v-for="crux in cruxStore.items" :key="crux.id">
+        <!-- Display markers for crux items -->
+        <template v-for="crux in cruxItems" :key="crux.id">
           <l-marker 
             v-if="crux.lat && crux.lng"
             :lat-lng="[parseFloat(crux.lat), parseFloat(crux.lng)]"
@@ -209,8 +243,9 @@ const onMapReady = (map: any) => {
         <span class="layer-icon">🗺️</span>
       </button>
       
-      <!-- Location button -->
+      <!-- Location button - only show if not in single crux mode -->
       <button 
+        v-if="!showSingleCrux"
         class="location-button" 
         @click="getCurrentLocation"
         :class="{ 'locating': isLocating }"
@@ -224,7 +259,6 @@ const onMapReady = (map: any) => {
 <style scoped>
 .map-wrapper {
   width: 100%;
-  height: 90vh;
   border-radius: 8px;
   overflow: hidden;
   position: relative;
@@ -351,5 +385,24 @@ const onMapReady = (map: any) => {
   100% {
     transform: scale(1);
   }
+}
+
+.popup-content {
+  padding: 5px;
+  max-width: 200px;
+}
+
+.popup-content h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+}
+
+.difficulty {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.stars {
+  color: #ff9800;
 }
 </style>
