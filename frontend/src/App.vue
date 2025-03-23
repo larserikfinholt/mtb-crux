@@ -15,7 +15,8 @@ onMounted(() => {
 <template>
   <header>
       <nav>
-        <RouterLink to="/">Map</RouterLink>
+        <RouterLink to="/">Sykkelcrux</RouterLink>
+        <RouterLink to="/map">Map</RouterLink>
         <RouterLink to="/list">List</RouterLink>
         <RouterLink to="/about">About</RouterLink>
       </nav>
