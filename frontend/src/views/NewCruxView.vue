@@ -73,6 +73,15 @@ const saveCrux = async () => {
   
   try {
     isSubmitting.value = true;
+    
+    // Check if user is authenticated
+    if (!isAuthenticated.value) {
+      await loginWithRedirect({
+        appState: { targetUrl: window.location.pathname }
+      });
+      return;
+    }
+
     // Get authenticated client
     const client = await getAuthenticatedClient();
     
