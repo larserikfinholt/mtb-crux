@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import CruxList from '@/components/CruxList.vue';
 
+import { useAuth0 } from '@auth0/auth0-vue'
+
+const { user } = useAuth0()
+
+// User info from Auth0
+console.log(user.value?.name)
+console.log(user.value?.email)
+console.log(user.value?.picture)
+console.log(user.value?.sub) // unique Auth0 ID
+
 </script>
 
 <template>

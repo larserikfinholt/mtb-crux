@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { getAuthenticatedClient} from '@/api/auth-helper'
 import { type Crux, Client } from '@/api/api-client'
 
 export const useCruxStore = defineStore('crux', () => {
@@ -7,8 +8,13 @@ export const useCruxStore = defineStore('crux', () => {
 
     
     const fetchItems = async () => {
-        const client = new Client()
-        const data = await client.getCrux()
+
+ 
+
+
+        const authenticatedClient = await getAuthenticatedClient()
+        //const client = new Client()
+        const data = await authenticatedClient.getCrux()
         items.value = data
     }
 
