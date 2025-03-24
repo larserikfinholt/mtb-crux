@@ -105,6 +105,62 @@ export class Client {
     }
 }
 
+export class ApplicationUser implements IApplicationUser {
+    id?: string;
+    email?: string;
+    name?: string;
+
+    [key: string]: any;
+
+    constructor(data?: IApplicationUser) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            for (var property in _data) {
+                if (_data.hasOwnProperty(property))
+                    this[property] = _data[property];
+            }
+            this.id = _data["id"];
+            this.email = _data["email"];
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): ApplicationUser {
+        data = typeof data === 'object' ? data : {};
+        let result = new ApplicationUser();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        for (var property in this) {
+            if (this.hasOwnProperty(property))
+                data[property] = this[property];
+        }
+        data["id"] = this.id;
+        data["email"] = this.email;
+        data["name"] = this.name;
+        return data;
+    }
+}
+
+export interface IApplicationUser {
+    id?: string;
+    email?: string;
+    name?: string;
+
+    [key: string]: any;
+}
+
 export class Crux implements ICrux {
     id?: number;
     lat?: string;
@@ -112,6 +168,8 @@ export class Crux implements ICrux {
     level?: number;
     name?: string;
     description?: string;
+    createdById?: string;
+    createdBy?: ApplicationUser;
 
     [key: string]: any;
 
@@ -136,6 +194,8 @@ export class Crux implements ICrux {
             this.level = _data["level"];
             this.name = _data["name"];
             this.description = _data["description"];
+            this.createdById = _data["createdById"];
+            this.createdBy = _data["createdBy"] ? ApplicationUser.fromJS(_data["createdBy"]) : <any>undefined;
         }
     }
 
@@ -158,6 +218,8 @@ export class Crux implements ICrux {
         data["level"] = this.level;
         data["name"] = this.name;
         data["description"] = this.description;
+        data["createdById"] = this.createdById;
+        data["createdBy"] = this.createdBy ? this.createdBy.toJSON() : <any>undefined;
         return data;
     }
 }
@@ -169,6 +231,8 @@ export interface ICrux {
     level?: number;
     name?: string;
     description?: string;
+    createdById?: string;
+    createdBy?: ApplicationUser;
 
     [key: string]: any;
 }
