@@ -1,16 +1,26 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import { useCruxStore } from '@/stores/crux';
-import { onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import { onMounted, watch } from 'vue';
 import { useAuth0 } from '@auth0/auth0-vue';
 
 const { loginWithRedirect, user, isAuthenticated } = useAuth0();
-const cruxStore = useCruxStore()
+const cruxStore = useCruxStore();
+const authStore = useAuthStore();
 
 onMounted(() => {
   console.log('fetching items')
   cruxStore.fetchItems()
 })
+
+// Watch for authentication state changes and register the user when authenticated
+watch(isAuthenticated, (isAuth) => {
+  if (isAuth) {
+    console.log('User authenticated, registering with backend')
+    authStore.registerUser()
+  }
+}, { immediate: true })
 </script>
 
 <template>
