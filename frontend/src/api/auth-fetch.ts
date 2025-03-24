@@ -10,7 +10,6 @@ export async function createAuthFetch(
     if (isAuthenticated.value) {
       try {
         const token = await getAccessTokenSilently();
-        console.log('token', token);
         
         // Add token to headers
         init = init || {};

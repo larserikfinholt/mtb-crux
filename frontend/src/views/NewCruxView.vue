@@ -86,10 +86,10 @@ const saveCrux = async () => {
     const client = await getAuthenticatedClient();
     
     // Create new crux
-    await client.createCrux(newCrux.value);
+    const id = await client.createCrux(newCrux.value);
     
     // Navigate to map view after successful creation
-    router.push('/map');
+    router.push(`/map`);
   } catch (error) {
     console.error('Error creating crux:', error);
     alert('Failed to create new crux. Please try again.');

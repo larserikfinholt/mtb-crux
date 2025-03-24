@@ -55,7 +55,7 @@ namespace api.Controllers
 
         [HttpPost(Name = "CreateCrux")]
         [Authorize]
-        public IActionResult Create([FromBody] Crux newCrux)
+        public ActionResult<int> Create([FromBody] Crux newCrux)
         {
             if (newCrux == null)
             {
@@ -64,7 +64,10 @@ namespace api.Controllers
 
             newCrux.Id = Cruxes.Max(c => c.Id) + 1;
             Cruxes.Add(newCrux);
-            return CreatedAtRoute("GetCrux", new { id = newCrux.Id }, newCrux);
+            // CreatedAtRoute does not work, need to return a 200 status code
+            return Ok(newCrux.Id);
+
+            //return CreatedAtRoute("GetCrux", new { id = newCrux.Id }, newCrux);
         }
     }
 }
