@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useCruxStore } from '@/stores/crux';
 import { type Crux } from '@/api/api-client';
 import { useRoute } from 'vue-router';
@@ -19,6 +19,10 @@ onMounted(async () => {
     }
 
     crux.value = cruxStore.items.find(c => c.id === id);
+    
+    // Debug: Check if createdBy property is available
+    console.log('Crux data:', crux.value);
+    console.log('CreatedBy data:', crux.value?.createdBy);
 });
 
 // Computed property to get the coordinates for the map
@@ -35,6 +39,10 @@ const cruxCoordinates = computed(() => {
     <div class="details-container">
       <h1>{{ crux?.name }}</h1>
       <p class="description">{{ crux?.description }}</p>
+      
+      <!-- Added createdBy information with fallback -->
+      <p class="created-by" v-if="crux?.createdBy">Created by: <span class="creator-name">{{ crux.createdBy.name }}</span></p>
+      <p class="created-by" v-else-if="crux?.createdById">Created by user ID: <span class="creator-name">{{ crux.createdById }}</span></p>
       
       <!-- Additional details can be added here -->
     </div>
@@ -68,6 +76,17 @@ const cruxCoordinates = computed(() => {
 .description {
   margin-top: 10px;
   line-height: 1.6;
+}
+
+.created-by {
+  margin-top: 15px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.creator-name {
+  font-weight: 600;
+  color: #333;
 }
 
 .map-container {

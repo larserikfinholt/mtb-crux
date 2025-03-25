@@ -2,6 +2,7 @@ using api.Data;
 using api.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace api.Controllers
@@ -22,7 +23,7 @@ namespace api.Controllers
         [HttpGet(Name = "GetCrux")]
         public IEnumerable<Crux> Get()
         {
-            return _context.Cruxes.ToList();
+            return _context.Cruxes.Include(x=>x.CreatedBy).ToList();
         }
 
         [HttpPost(Name = "CreateCrux")]
