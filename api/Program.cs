@@ -1,4 +1,5 @@
 using api.Data;
+using api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,9 +15,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.Audience = Configuration["Auth0:Audience"];
         options.TokenValidationParameters = new TokenValidationParameters
         {
-            NameClaimType = "name"
+            NameClaimType = "name",
         };
     });
+
+// Register AuthService with HttpClient
+builder.Services.AddHttpClient<AuthService>();
+builder.Services.AddScoped<AuthService>();
 
 // Add in-memory database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

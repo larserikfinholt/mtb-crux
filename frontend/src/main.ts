@@ -18,7 +18,8 @@ app.use(
       clientId: import.meta.env.VITE_AUTH0_CLIENT_ID,
       authorizationParams: {
         redirect_uri: window.location.origin,
-        audience: import.meta.env.VITE_AUTH0_AUDIENCE // This should be your API identifier in Auth0
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE, // This should be your API identifier in Auth0
+        scope: 'openid profile email' // Add email scope to request email claim
       }
     })
   );
