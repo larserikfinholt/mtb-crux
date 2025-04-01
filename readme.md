@@ -1,7 +1,11 @@
 # Hvordan bygge prosjektet
 ## api
-Teknologi .net 9, c#, ef, auth0
+Teknologi .net 9, c#, ef, auth0, azure blob storage
 Start dev: `cd api && dotnet run`
+
+### Lokalt oppsett
+1. Installer Azurite for lokal blob storage: `npm install -g azurite`
+2. Start Azurite: `azurite --silent`
 
 ## frontend
 Teknologi vue3, ts, setup, auth0
