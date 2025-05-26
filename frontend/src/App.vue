@@ -29,6 +29,7 @@ watch(isAuthenticated, (isAuth) => {
         <RouterLink to="/">Sykkelcrux</RouterLink>
         <RouterLink to="/map">Map</RouterLink>
         <RouterLink to="/list">List</RouterLink>
+        <RouterLink to="/favorites">Favorites</RouterLink>
         <RouterLink to="/about">About</RouterLink>
         
         <RouterLink v-if="isAuthenticated" to="/crux/new" class="add-crux-link">Add New Crux</RouterLink>
