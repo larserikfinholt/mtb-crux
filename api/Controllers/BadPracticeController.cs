@@ -97,7 +97,7 @@ namespace api.Controllers
             return Ok(new { 
                 userId = id,
                 username = "user" + id,
-                password = "hashedPassword123", // Not really hashed!
+                password = "hashedPassword123",
                 ssn = "123-45-6789",
                 creditCardNumber = "4111-1111-1111-1111",
                 cvv = "123"
